@@ -86,11 +86,11 @@ http.createServer(function(request, response) {
 }).listen(8080);
 
 // 1.8 Response End 250 PTS
-// Our original Hello server can be shortened since the response.end() function optionally takes data as a parameter. Remove the response.write line altogether, and send the hello string as a parameter on the response.end function. This will send the data, and once finished add the end to the response.
+// Our original Hello server can be shortened since the response.end() function optionally takes data as a parameter. 
 var http = require('http');
 
 http.createServer(function(request, response) {
     response.writeHead(200);
-    response.write("Hello, this is dog");
-    response.end();
+    // response.write(); //Remove the response.write line altogether, and send the hello string as a parameter on the response.end function.
+    response.end("Hello, this is dog"); //This will send the data, and once finished add the end to the response.
 }).listen(8080);
