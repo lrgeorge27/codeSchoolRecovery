@@ -50,3 +50,66 @@ app.get('/', function(request, response) { //creates a route that accepts a GET 
 app.listen(3000, function() { //takes an optional callback, which is called once the app is ready to start taking requests
     console.log('Listening on port 3000');
 }); //binds app to tcp port 3000
+
+//The .send() converts objects and arrays to JSON
+
+app.get('/blocks', function(request, response) { //root name blocks
+    var blocks = ['Fixed', 'Movable', 'Rotating']; //create an array with 3 elements
+    response.send(blocks); //send converts the array to a JSON object
+});
+//call
+// $ curl - i http: //localhost:3000/blocks
+//     //response
+// HTTP / 1.1 200 OK
+// X - Powered - By: Express
+// Content - Type: application / json;
+// charset = utf - 8["Fixed", "Movable", "Rotating"]
+
+//response.json function
+app.get('/blocks', function(request, response) { //root name blocks
+    var blocks = ['Fixed', 'Movable', 'Rotating']; //create an array with 3 elements
+    response.json(blocks); //converts the array to a JSON object, reads better when only using JSON
+});
+
+//send converts strings to HTML
+app.get('/blocks', function(request, response) { //root name blocks
+    var blocks = '<ul><li>Fixed</li><li>Movable</li></ul>'; //create an array with 3 elements
+    response.send(blocks); //send converts strings to HTML
+});
+//call
+// $ curl - i http: //localhost:3000/blocks
+//     //response
+// HTTP / 1.1 200 OK
+// X - Powered - By: Express
+// Content - Type: text / html;
+// charset = utf - 8 //type is text/html
+// <ul> <li>Fixed</li> < li > Movable < /li></ul > //returns HTML
+//Use EJS or Jade for server-side templates
+
+//Redirecting paths
+app.get('/blocks', function(request, response) {
+    response.redirect('/parts'); //redirect uses new path name as the argument, setting proper response headers and redirecting to new path
+});
+//call 
+// $ curl - i http: //localhost:3000/blocks
+//     //response
+// HTTP / 1.1 302 Moved Temporarily
+// X - Powered - By: Express
+// Location: /parts
+// Content - Type: text / plain;
+// charset = utf - 8
+// Moved Temporarily. Redirecting to / parts
+
+//Custom code status
+app.get('/blocks', function(request, response) {
+    response.redirect(301, '/parts'); //redirect uses status code as the first argument, and new path as the second argument
+});
+//call
+// $ curl - i http: //localhost:3000/blocks
+//     //response
+// HTTP / 1.1 301 Moved Permanently
+// X - Powered - By: Express
+// Location: /parts
+// Content - Type: text / plain;
+// charset = utf - 8
+// Moved Permanently. Redirecting to / parts
