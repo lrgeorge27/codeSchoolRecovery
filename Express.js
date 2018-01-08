@@ -113,3 +113,15 @@ app.get('/blocks', function(request, response) {
 // Content - Type: text / plain;
 // charset = utf - 8
 // Moved Permanently. Redirecting to / parts
+
+//1.3
+var express = require('express');
+var app = express();
+
+app.get('/locations', function(request, response) {
+    var cities = ['Caspiana', 'Indigo', 'Paradise'];
+    response.send(cities);
+});
+app.listen(3001, function() {
+    console.log("Running Express");
+});
