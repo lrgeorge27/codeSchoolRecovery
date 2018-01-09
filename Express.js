@@ -1,6 +1,6 @@
 //Express.js 1.1 
 
-// Web application framework or Node
+// Web application framework for Node
 // minimal, flexible, great for building APIs, foundation for Kranken and Sails
 
 // $ npm install express
