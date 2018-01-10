@@ -23,7 +23,7 @@ http.createServer(function(request, response) { ... });
 //previous line is the same as the next two lines; two different ways to emit and event.
 var server = http.createServer();
 server.on('request', function(request, response) { ... });
-//This is how we add even listeners
+//This is how we add event listeners
 Event: 'close'
 
 function //emitted when the server closes
