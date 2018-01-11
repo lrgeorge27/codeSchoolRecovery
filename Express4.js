@@ -141,4 +141,3 @@ app.delete('/cities/:name', function(request, response) { // Create a DELETE rou
         response.sendStatus(404); //If a valid city is not found, then respond with a 404 HTTP status code using the sendStatus() function.
     }
 });
-app.listen(3000);
