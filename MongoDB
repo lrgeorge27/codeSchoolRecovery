@@ -1,0 +1,43 @@
+//MongoDB Level 1.1
+
+//Open-source NoSQL database - not relational, no query language
+//Document-oriented 
+//Great for unstructured data, especially when you have a lot of it
+//Created in 2007, open-sourced in 2009, "humongous"
+
+//Mongo vs. SQL
+//SQL: Database > table > row
+//Mongo: Database > collections > documents
+//Documents exist independently and can have different fields - dynamic schema
+//all data gets grouped together within a document
+//Collections are groups of documents
+
+//Interact with MongoDB through the terminal command line, uses JavaScript
+$ mongo
+    >
+    Starts the shell
+    //uses JavaScript variable assignments and documents are JSON-like objects. 
+    //{
+    //field: value pairs must be separated by a ,
+    //}
+
+    > use dbname //opens db or creates it, if it doesn't exist
+    > db //shows name of current db
+    > help //gives list of commands
+
+    //storing documents in collections
+    > db.potions.insert( //always start with db to access database. 
+        //specify collection name (collection is automatically created). and operation to preform()
+        { //parameter of insert()
+            "name": "Invisibility",
+            "vendor": "Kettlecooked"
+        }
+    )
+
+WriteResult({ "nInserted": 1 }) //tells us whether or not the operation was successful, nInserted - number of documents inserted into db
+
+    > db.potions.find() {  //find() retrieves all documents from a collection
+        "_id": ObjectID("559f07d..."), //automatically generates a unique ID
+        "name": "Invisibility",
+        "vendor": "Kettlecooked"
+    }

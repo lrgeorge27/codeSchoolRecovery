@@ -2,7 +2,6 @@
 
 //Express is a "Sinatra (simple web framework for Ruby) inspired web development framework for Node.js--insanely fast, flexible, and simple"
 //Provides easy route URLs to callbacks, middleware(from Connect), environment based configuration, redirection helpers, file uploads
-
 $npm install--save express //installs module and add to depencies file in package.json
 var express = require('express');
 var app = express();
@@ -71,7 +70,7 @@ var app = express();
 app.get('/tweets', function(request, response) {
     response.sendFile(__dirname + "/tweets.html");
 });
-app.listen(8080);
+app.listen(process.env.IP);
 
 // 5.3 Route Params 130 PTS
 // Let's create a route that accepts dynamic arguments in the URL path and responds with the quote from the proper author.

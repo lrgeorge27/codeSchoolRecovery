@@ -1,0 +1,203 @@
+MongoDB 2.1 Removing and Modifying Documents
+
+Removing documents: 
+> db.potions.remove({"name": "Love"})  //query matches single document
+WriteResult({ "nRemoved": 1 })  //1 document removed
+
+Delete Multiple Docs:
+> db.potions.remove({"vendor": "Kettlecooked"}) //query matches multiple docs 
+WriteResult ({ "nRemoved": 2}) //2 removed
+Passing {} as the query would delete all documents in the collection.
+
+Update Documents:
+> db.potions.update(
+    {"name": "Love"}, //query parameter
+    {"$set": {"price": 3.99}) //update parameter, update operators always begin with $ 
+Update only applied to matches the first 
+
+
+2.2 Oblitero Wand I 150 PTS
+While Merlin was looking through our wand information, he suddenly began to panic about a wand named the "Doom Bringer" and he ran out screaming. We should probably get rid of that wand if it scares a great wizard like Merlin.
+Write the command to remove the wand with the name of "Doom Bringer" from our wands collection.
+>db.wands.remove({"name": "Doom Bringer"})
+
+2.3 Oblitero Wand II 150 PTS
+When we removed the "Doom Bringer" wand, we noticed that it had a power of "Death", and we don't want any wands like that in our database. To be safe, let's remove any wands containing that in their powers.
+> db.wands.remove({"powers": "Death"})
+
+2.4 Wand Reductions 250 PTS
+The makers of the "Devotion Shift" wand have decided to reduce its price since no one is showing interest in their luxury wand.
+Write the command to update the wand with a name of "Devotion Shift" and set the price to 5.99.
+> db.wands.update(
+    {"name": "Devotion Shift"},
+    {"$set": {"price": 5.99}})
+    
+2.5 Magical Regulations 240 PTS
+The Grand House of Magic recently passed a law that all wands with "Fire" in their list of powers must increase their level_required field by 2. We need to update all wands that have been affected by the new law.
+First, let's add the query parameter to find all wands that include "Fire" in their powers.
+Great! Now add an update parameter to increment the level_required by 2.
+Now that we have a working update command, change it so that the update will apply to all documents that match the query.
+> db.wands.update(
+    {"powers": "Fire"},
+    {"$inc": {"level_required": 2}},
+    {"multi": true}
+    )
+    
+2.6 User Chronicles 250 PTS
+We'd like to see which wands users are looking at most. To do this, we'll use the logs collection that contains documents that record the name and count for each wand.
+First, let's add the query parameter to find a wand with the name of "Dream Bender".
+Great! Now add the update parameter to increment the count field by 1.
+Add the option that will create a new document if none match the query or update an existing document.
+> db.logs.update(
+    {"name": "Dream Bender"},
+    {"$inc": {"count": 1}},
+    {"upsert": true}
+    )
+    
+2.7 Advanced Modification
+Update operators: 
+$unset - removes a specific field. 
+$rename - changes field names
+$set - update the value of a specific field
+$max - updates if new value is greater than current or inserts if empty
+$min - updates if new value is less than current or inserts if empty
+$mul - multiplies current field value by specified value. If empty inserts 0.
+$pop - removes first or last value of an array, 1 for last, -1 for first
+$push - add value to the end of an array
+$addToSet - adds value to end of an array unless it is already present
+$pull - remove any instance of a value from an array
+
+> db.potions.update(
+    {}, //query for all potions
+    {"$unset": {"color": ""}}, //empties the value, the value we pass doesn't impact the operation
+    {"multi": true} //update all potions
+    )
+
+> db.potions.update(
+    {},
+    {"$rename": {"score": "grade"}}, //rename specified files, {field to rename: new field name}
+    {"multi": true}
+    )
+
+Reference array values with dot notation to change a single index
+"ingredients": ["hippo", "secret", "mouse feet"]
+
+>db.potions.update(
+    {"name": "Shrinking"}, //select 
+    {"$set": {"ingredients.1": 42}} //use dot notation to select array index: change to index
+    )
+WriteResult({"nMatched": 1, "nUpserted": 0, "nModified": 1})
+
+Positional operator - placeholder that will set the proper position for the value specified in the query parameter.
+> db.potions.update (
+    {"ingredients": "secret"}, //query for the value we want to change
+    {"$set": {"ingredients.$": 42}}, //$ is the placeholder for the matched value
+    {"multi": true} //makes change to all documents
+    )
+Positional operator only updates the first match per document
+
+Use dot notation to update an embedded value
+"ratings": {
+    "strength": 1, 
+    "flavor": 5
+    }
+> db.potions.update(
+    {"name": "Shrinking"}, 
+    {"$set": {"ratings.strength": 5}} //access embedded value with dot notation
+    )
+WriteResult({"nMatched": 1, "nUpserted": 0, "nModified": 1})
+
+Modifying Arrays:
+"categories": ["tasty", "effective"]
+
+> db.potions.update(
+    {"name": "Shrinking"}, 
+    {"$pop": {"categories": 1}} //1 removes last element, -1 removes first element
+    )
+Result:
+"categories": ["tasty"]
+
+> db.potions.update(
+    {"name": "Shrinking"}, 
+    {"$push": {"categories": "budget"}}
+    )
+Result:
+"categories": ["tasty", "budget"]
+
+> db.potions.update(
+    {"name": "Shrinking"}, 
+    {"$addToSet": {"categories": "budget"}}
+    )
+Result:
+"categories": ["tasty", "budget"] //"budget" was not added twice
+
+> db.potions.update(
+    {"name": "Shrinking"}, 
+    {"$pull": {"categories": "tasty"}}
+    )
+Result:
+"categories": ["budget"]
+
+2.8 Smelly Wands 250 PTS
+A few of the old wands included a smell field, and we're not exactly sure why anyone thought that would be a relevant field. Let's get rid of it!
+Add the update parameter that will remove the smell field from all documents.
+>db.wands.update(
+  {},
+  {"$unset": {"smell": ""}},
+  {"multi": true}
+)
+
+2.9 Disgruntled Wand Makers 250 PTS
+We've been getting some complaints from wand makers that the term "creator" doesn't properly convey the true nature of their craft. To make them happy, we need to change the field creator to maker.
+Add the update parameter that will rename the creator field to "maker" for all documents.
+>db.wands.update(
+  {},
+  {"$rename": {"creator": "maker"}},
+  {"multi": true}
+)
+
+2.10 Abracadabra Array Alterations I 150 PTS
+We want to be the go-to source for wand information. Currently, we are listing one-word powers for each wand, but we should probably start being more specific. Here's the document we'll be working with:
+For the wand above, let's add the update parameter to set the value of "Fire" to "Fire Deflection" in the powers array.
+
+Remember that we only want to update a single array value, not all of the values in the array.
+>db.wands.update(
+  {"name": "Dream Bender"},
+  {"$set": {"powers.0": "Fire Deflection"}}
+)
+
+2.11 Abracadabra Array Alterations II 250 PTS
+We know that there are a lot of wands with the power of "Love", but the correct power is actually named "Love Burst". We'll need to update all wands that contain this power.
+Add the update parameter using the positional operator to change the value of "Love" to "Love Burst".
+>db.wands.update(
+  {"powers": "Love"},
+  {"$set": {"powers.$": "Love Burst"}},
+  {"multi": true}
+)
+
+2.12 Abracadabra Array Alterations III 250 PTS
+While some people may know that wands can cast spells, others may think they're just fancy sticks. Let's add "Spell Casting" to the list of powers for the "Dream Bender" wand.
+Add the update parameter that will add "Spell Casting" to the end of the powers array for this wand.
+>db.wands.update(
+  {"name": "Dream Bender"},
+  {"$push": {"powers": "Spell Casting"}}
+)
+
+2.13 Abracadabra Array Alterations IV 250 PTS
+Let's go ahead and add "Spell Casting" to every wand's powers array, but only if that power doesn't already exist.
+db.wands.update(
+  {},
+  {"$addToSet": {"powers": "Spell Casting"}},
+  {"multi": true}
+)
+
+2.14 Sensible Stats 250 PTS
+People are getting confused by the damage stats for each wand. We've been basing damage on a scale of 1-10, but we should be using a scale of 1-100. We've gone ahead and updated "damage.magic" by multiplying the original value by 10 for all the documents. Here's an example:
+Check out the MongoDB documentation to learn how to use the $mul operator, and then use it multiply the value of "damage.melee" by 10 for all documents.
+db.wands.update(
+  {},
+  {"$mul": {"damage.melee": 10}},
+  {multi: true}
+)
+
+
