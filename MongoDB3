@@ -1,0 +1,163 @@
+MongoDB Level 3 Query Operators
+
+Use multiple criteria (separate with ,)in a query:
+> db.potions.find(
+    {
+    "vendor": "Kettlecooked", 
+    "ratings.strength": 5
+      }
+      )
+      
+Comparition Query Operators:
+$gt - greater than (>)
+$lt - less than (<)
+$gte - greater than or equal to (>=)
+$lte - less than or equal to (<=)
+$ne - not equal to
+$elemMatch - range query for an array
+
+
+Find potions less than $20:
+> db.potions.find({"price": {"$lt": 20}})
+
+Find potions greater than & less than $20:
+> db.potions.find({"price": {"$gt": 10, "$lt": 20}})
+
+Not equal to Brewers:
+>db.potions.find({"vendor": {"$ne": "Brewers"}})
+
+Range query on an array - $elemMatch - at least 1 value must match criteria
+> db.potions.find(
+    {"sizes": {"$elemMatch": {"$gt": 8, "$lt": 16}}}
+    )
+
+3.2 Picky Preferences 240 PTS
+When it comes to wands, it's okay to be picky about which one we want.
+First, find all the wands where the maker is "Moonsap".
+Now, update the query to only retrieve wands that h ave a level_required of 5.
+
+>db.wands.find(
+  {"maker": "Moonsap", "level_required": 5}
+)
+
+
+3.3 Supernatural Stats 250 PTS
+Believe it or not, some lower-level wands have better stats than those that are equal to our current level.
+Write a query for wands that have a level_required that is less than or equal to 5.
+> db.wands.find(
+  {"level_required": {"$lte": 5}}
+)
+
+3.4 All You Need Is Love 250 PTS
+Wands can only have a few powers, so it's important to make sure your wand doesn't contain any powers you don't like.
+Write a query for wands that do not include "Love Burst" in their powers.
+> db.wands.find(
+  {"powers": {"$ne": "Love Burst"}}
+)
+
+3.5 Marvelously Mighty Melee 250 PTS
+At our current level, we can't do much magic damage yet, but we can do melee damage all the way up to 40.
+Let's find out which wands have a "damage.melee" that is greater than or equal to 30 and less than or equal to 40.
+> db.wands.find(
+  {"damage.melee": {"$gte": 30, "$lte": 40}}
+)
+
+3.6 Bananas for Wands 250 PTS
+Wands come in a variety of lengths, and the magic folk use bananas for measurement. We've added a new lengths field to each wand that contains an array of the different lengths a wand comes in.
+
+To find a proper wand, we'll need one that fits our size.
+Write a query that will find any wands that contain lengths that are greater than or equal to 2.5 but less than 3. Remember, arrays can be tricky!
+db.wands.find(
+  {"lengths": {"$elemMatch": {"$gte": 2.5, "$lt": 3}}}
+)
+
+3.7 Merlin's Mythical Madness 240 PTS
+Now that we're getting pretty good at finding wands, let's find the perfect wand for our friend Merlin.
+Merlin's first requirement is the wand must not be made by "Foxmond".
+
+db.wands.find(
+  {
+    "maker": {"$ne": "Foxmond"},    //Write the query to find wands that don't have "Foxmond" as the maker.
+    "level_required": {"$lte": 75}, //Next, Merlin's level is 75 so we'll want to add a query for a level_required that is less than or equal to 75.
+    "price": {"$lt": 50},           //Merlin doesn't want to spend more than 50 gems. Add another query that makes sure the price is less than 50.
+    "lengths": {"$elemMatch": {"$gte": 3, "$lte": 4}}  //Lastly, make sure the wand is 3 to 4 banana lengths. Remember, arrays can be tricky!
+    }
+)
+
+3.8 Customizing Queries
+Find potions w/ grade gte 80, but we only need the name and vendor:
+find() takes a second parameter, "projections" that can be used to specify exact fields returned by setting value to true. Best practice to only retrieve data you need.
+
+> db.potions.find(
+    {"grade": {"$gte": 80}}, 
+    {"vendor": true, "name": true}
+    )
+This query returns id #, vendor, and name. ID# are returned by default
+
+Exclude fields by setting projection value to false:
+> db.potions.find(
+    {"grade": {"$gte": 80}}, 
+    {"vendor": false, "name": false}
+    )
+This query returns all document info except vendor and name.
+
+Prevent the ID field from being returned, usually used for non-developers:
+> db.potions.find(
+    {"grade": {"$gte": 80}}, 
+    {"vendor": true, "price": true, "_id": false}
+    )
+This is the only time we can mix an exclusion with selections
+
+find() only returns the first 20 documents in a collection, "it" iterates through he rest.
+Show the # of documents
+>db.potions.find().count() //find() returns the cursor object, count() is a method on cursor object that returns the count of matching docs
+
+Sort(), 1 orders ascending, -1 orders descending
+> db.potions.find().sort({"price": 1}) 
+
+Pagination - we can implement basic pagination by limiting and skipping over documents:
+On the 1st page we are skiping 0, and limiting to 3:
+> db.potions.find().limit(3)
+On the 2nd page we are skipping the first 3 pages and limiting to 3:
+> db.potions.find().skip(3).limit(3)
+On the 3rd page we skip the first 6 docs and limiting to 3:
+> db.potions.find().skip(6).limit(3)
+
+3.9 Precise Projections 240 PTS
+We'd like to have an index page where users can see the name of all the wands we have in our database.
+Write a query that will find all wands, but this time project only the name field. Don't worry about the _id showing up in the results for now.
+We've got all the names, but they're all jumbled up. Add a cursor method to sort the names alphabetically.
+> db.wands.find({}, {"name": true}).sort({"name": 1})
+
+3.10 The Realm of Requirements 140 PTS
+We need to create a report detailing all the wand information except for their price and lengths. Since non-developers will be looking at this report, let's remove the _id as well.
+Write a query for all wands that excludes the price, lengths, and _id field.
+> db.wands.find({},
+{"price": false, "lengths": false, "_id": false},
+)
+
+The criteria for the report have changed. We need to write a query to include the name and powers fields.
+Include only the needed fields, but continue to exclude to _id field.
+> db.wands.find({},
+{"name": true, "powers": true, "_id": false},
+)
+
+3.11 Casting the Count 250 PTS
+For the sake of science and all things good, let's find out how many wands only have a level_required of 2.
+> db.wands.find({"level_required": 2}).count()
+
+
+3.12 The Cursor's Crystal Ball 150 PTS
+Finish the code below so that only 8 wands are returned by the cursor for each page:
+
+db.wands.find({}).skip(0).limit(8)
+
+
+3.13 Fantastical Findings 250 PTS
+Some really famous wizards and sorceresses are interested in finding out information about the most expensive wands we have. Let's pull the data on our top three most expensive wands.
+First, let's write a query to match all wands.
+Next, add a cursor method to sort the wands in descending order by their price field.
+Lastly, add another cursor method to limit the results to only 3 documents.
+> db.wands.find({}).sort({"price": -1}).limit(3)
+
+

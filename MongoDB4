@@ -1,0 +1,107 @@
+MongoDB Level 4.1 Data Modeling
+
+Creating User Document storing username, email, and favorites [use an array to store multi values]
+Instead of embedding vendor info, create a vendor collection and refernce the vendor document in each potion doc
+
+Inserting referenced documents:
+Vendor collection:
+> db.vendors.insert({
+    "_id": "Kettlecooked",  //specify unique _id
+    "phone": 55555555555, 
+    "organic": true
+    })
+
+Potion collection:
+> db.potions.insert({
+        "_id": ObjectId(...),
+        "name": "Invisibility", 
+        "vendor_id": "Kettlecooked",  //refernced document
+        ...
+    })
+
+Querying a Referenced Document - In order to pull the potion document and the vendor info, we must first query for the potion to get the vendor_id, then query again to get the vendor info.
+> db.potions.find({"name": "Invisibility"})
+> db.vendors.find({"_id": "Kettlecooked"})
+
+Embedding Documents:
+Data readily available
+Atomic write operations - all the operations occur or nothing happens, ensures complete updates
+
+Referenced Documents - exist independently 
+One place to maintain vendor info, maintains consistances
+Cannot multi-document write, no atomic write operations
+
+
+4.2 Marvelous Merging 150 PTS
+Fill in the blank with the correct answer.
+
+When we take the data from one document and place it inside another one, that's called an 
+embedded document.
+ 
+4.3 Related Realms 150 PTS
+Fill in the blank with the correct answer.
+
+If we take a unique value like an _id from one document and store it as a value within a related document, we have just created a 
+referenced document.
+
+4.4 Lookout Incantations
+For what reason might we want to consider referencing maker information instead of embedding it within each wand?
+Duplicate Data
+
+4.5 Quantifying Queries 250 PTS
+What's the minimum number of queries we'd have to write in order to retrieve a document and its referenced data?
+2
+
+4.6 Chalice of Choices 250 PTS
+Which modeling option would give us all the data we need with a single query, support for atomic writes, and is great for data that is strongly related?
+Embedding
+
+4.7 Cauldrons of Considerations 250 PTS
+Which data modeling decision doesn't have default support for atomic writes across multiple documents and should be utilized with care
+Referenced
+
+4.8 Data Modeling Decisions
+1. How often will the data be used together?
+Referencing is not ideal for data that is always used together
+Embedding is usually a good choice for data frequently used together
+
+2. what is the the size of the data?
+embedded if < 100 docs
+referencing if > 1000 docs
+
+3. Will the data change often?
+embed if the data will rarely or occationally change
+reference data that changes regularly
+
+Comments should be embedded on Potions because they will always be shown together, 
+won't change often and we expect lt 100
+
+Comments should be referenced on User collection because user details will change often and we expect more users than comments
+
+Guidelines and Takeaways:
+Embedding is generally the best starting point
+Reference data when you need to access it independently 
+Reference when you have large data sizes
+Focus on how your data will be used
+If you need complex references, consider a relational database
+
+4.9 Casting Choices 250 PTS
+In general, what's the best option to first consider for modeling your related data?
+Embedded
+
+4.10 Unique Users 250 PTS
+Which data modeling option would be the best fit for storing users and their addresses when we know that the data is used together often, won't be changing regularly, and each user will only be storing a few addresses?
+Embedding
+
+4.11 Charming Cars 250 PTS
+We'd like to store information about cars, and each car can have a few hundred parts. Most of the time, we won't be needing specific information about each part. Which data modeling route should we take?
+Referencing
+
+4.12 Charming Changes 250 PTS
+Which modeling route is best when we have data that is constantly changing and will help prevent data inconsistencies from arising?
+Referencing
+
+4.13 Bewitched Access 250 PTS
+Which data modeling route allows us to access our data independently instead of having to use something like dot notation to get information?
+Referencing
+
