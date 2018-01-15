@@ -1,0 +1,49 @@
+MongoDB Level 5 Common Aggregations
+
+Find the number of potions per vendor
+Aggregation framework allows for advanced computations
+> db.potions.aggregate(  //takes stage operators as parameters
+    [{"$group": {"_id": "$vendor_id"}}] //$group stage operator used to group data by any field specified
+    )
+    //$vendor_id - field names that begin with $ are called "field paths" and are linked to a field in a document
+    //"_id" is the group key, anything that comes after is an accumulator
+
+Anything specified after the group key is and accumulator. Accumulators take a single expression and compute the expression for grouped documents. 
+    
+> db.potions.aggregate(  
+    [{"$group": {"_id": "$vendor_id", "total": {"$sum": 1}}}] 
+                    //$group key                //add 1 for each matching doc, accumulator 
+    )
+
+When fields begin with a $ they are operators that preform a task
+When values begin with a $ they represent field paths that point to the value
+
+> db.potions.aggregate([  
+    {"$group": {
+    "_id": "$vendor_id", 
+    "total": {"$sum": 1},
+    "grade_total": {"$sum": "$grade"} //second accumulator, sum grade for potions
+    }
+    } 
+    ])
+
+Averaging the grade for vendor
+> db.potions.aggregate(  
+    [{"$group": {
+    "_id": "$vendor_id", 
+    "avg_grade": {"$avg": "$grade"}
+    }
+    }
+    ])
+
+
+Get the Max and Min the grade for vendor
+> db.potions.aggregate(  
+    [{"$group": {
+    "_id": "$vendor_id", 
+    "max_grade": {"$max": "$grade"},
+    "min_grade": {"$min": "$grade"},
+
+    }
+    }
+    ])
