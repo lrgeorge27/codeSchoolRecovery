@@ -9,7 +9,6 @@ Aggregation framework allows for advanced computations
     //"_id" is the group key, anything that comes after is an accumulator
 
 Anything specified after the group key is and accumulator. Accumulators take a single expression and compute the expression for grouped documents. 
-    
 > db.potions.aggregate(  
     [{"$group": {"_id": "$vendor_id", "total": {"$sum": 1}}}] 
                     //$group key                //add 1 for each matching doc, accumulator 
@@ -47,3 +46,105 @@ Get the Max and Min the grade for vendor
     }
     }
     ])
+
+5.2 Many Makers 250 PTS
+Not only have we been adding wands, but our users have been adding new ones daily! Let's create a list of all the unique wand makers in our database.
+Write an aggregate to group wands by their maker so that we'll get a list of unique makers.
+> db.wands.aggregate([{"$group": {"_id": "$maker"}}])
+
+5.3 Detecting Damage 240 PTS
+Most of our users only care about the magic damage for their wand. After all, what's the point of doing awesome spells at low levels? Let's find out how many wands we have for each damage.magic score.
+Write an aggregate that groups wands by their damage.magic.
+Add an accumulator with a wand_count field to count the number of wands per damage.magic score.
+> db.wands.aggregate([{"$group": {"_id": "$damage.magic", "wand_count": {"$sum": 1}}}])
+
+5.4 Royal Connoisseurs 240 PTS
+Our site is a popular resource for wand collectors to find wands by makers they don't yet have. One ambitious connoisseur has asked how much it would cost to buy all the wands for each vendor. Let's find out!
+Write an aggregate that groups our wands by the maker field.
+Add an accumulator with the total_cost field that sums the price for each wand per maker.
+> db.wands.aggregate([{"$group": {"_id": "$maker", "total_cost": {"$sum": "$price"}}}])
+
+5.5 Mischievous Makers 240 PTS
+They say that knowledge is power. Let's see what sort of interesting information we can find out based on the data we have. We have a slight suspicion that wand makers like to charge more for wands at "monumental levels". Time to prove it!
+Write an aggregate to group wands by their level_required.
+Add an accumulator with a field named price_average to get the average price for the wands per level.
+> db.wands.aggregate([{"$group": {"_id": "$level_required", "price_average": {"$avg": "$price"}}}])
+
+5.6 A Glimmering Guide 220 PTS
+Let's put together a simple buyer's guide with some basic stats about makers to help our users quickly make wand decisions.
+> db.wands.aggregate([{"$group": {"_id": "$maker",   //Write an aggregate to group wands by their maker.
+                                "total_wands": {"$sum": 1},  //Add an accumulator with the field total_wands to sum the number of wands each maker has
+                                "max_magic": {"$max": "$damage.magic"}, //Now add an accumulator with the field max_magic that finds that greatest damage.magic per maker
+                                "lowest_price": {"$min": "$price"}   //Lastly, add one more accumulator with the field lowest_price that finds the lowest wand price per maker.
+                               }}])
+
+
+5.7 The Aggregation Pipeline
+The aggregate method acts like a pipeline, where we can pass data through many stages in order to change it along the way. 
+Each stage modifies the working data set and then passes the altered documents to the next stage until we get our desired result.
+
+$match is like a find() query, only passing documents to the next stage if they meet the specified criteria: 
+Use $match early to reduce the number of documents for better performance. 
+> db.potions.aggregate([{"$match": {"ingredients": "unicorn"}}])
+
+Group data with multiple stages separated with a comma in an array:
+> db.potions.aggregate([
+    {"$match": {"ingredients": "unicorn"}}, //first stage 
+    {"$group":                              //second stage
+        {"_id": "$vendor_id", 
+         "potion_count": {"$sum": 1}
+         }
+    }
+    ])
+
+> db. potions.aggregate([
+    {"$match": {"price": {"$lt": 15}}}, //Query for potions with a price lt $15.
+    {"$group": {"_id": "$vendor_id", "avg_grade": {"$avg": "$grade"}}}, //Group potions by vendor and average their grades.
+    {"$sort": {"avg_grade": -1}}, //Sort results by grade average.
+    {"$limit": 3}  //Limit results to 3 vendors.
+    ])
+    
+Optomize the pipeline:
+It's best practice to only send the needed data from stage to stage. 
+> db. potions.aggregate([
+    {"$match": {"price": {"$lt": 15}}}, //Query for potions with a price lt $15.
+    {"$project": {"_id": false, "vendor_id": true, "grade": true}}, //Use $project as soon as possible to limit the fields sent to only those we really need.
+    {"$group": {"_id": "$vendor_id", "avg_grade": {"$avg": "$grade"}}}, //Group potions by vendor and average their grades.
+    {"$sort": {"avg_grade": -1}}, //Sort results by grade average.
+    {"$limit": 3}  //Limit results to 3 vendors.
+    ])
+
+5.8 Lower-level Castings 230 PTS
+Some wand powers can be harder to find in lower-level wands. We've heard that the power "Air Bolt" is a really fun one to have. Let's find out which makers offer a wand with that power and find the lowest level_required per maker.
+> db.wands.aggregate([  //Write an aggregate that will only match wands that have "Air Bolt" in their list of powers.
+  {"$match": {"powers": "Air Bolt"}},   //Add another aggregate stage to group the data by their maker.
+  {"$group": {"_id": "$maker", "lowest_level": {"$min": "$level_required"} }}   //Add an accumulator with a field named lowest_level that finds the lowest level_required per maker.
+])
+
+5.9 Budget Castings 220 PTS
+A user has asked us to find out which makers have wands that are under 50 gems and have a damage.magic average above 40.
+Now that we've got our data all set, let's filter it down further.
+> db.wands.aggregate([
+  {"$match": {"price": {"$lt": 50}}},   //Write an aggregate to match wands that have a price that is less than 50.
+  {"$group": {"_id": "$maker", "average_magic": {"$avg": "$damage.magic"}}},    //Add the aggregate stage to group the wands by their maker. Add an accumulator with a field named average_magic to find the average damage.magic per maker using the $avg accumulator.
+  {"$match": {"average_magic": {"$gt": 40}}}    //Below the existing $match and $group aggregates, add another $match aggregate so that we're only retrieving results with an average_magic that is greater than 40.
+])
+
+5.10 Clairvoyant Decisions 200 PTS
+We're always on the lookout for the best wand for its value. Let's find out the top 5 makers that offer the most magic damage for a wand in our level range.
+Write an aggregate that finds wands that have a level_required that's less than or equal to 5.
+Add the aggregate stage to group the wands by their maker.
+Add an accumulator with the field max_damage that finds the max damage.magic per maker.
+Now that we have the bulk of our data, let's go ahead and sort the max_damage in descending order.
+Add a limit stage so that we only find the first 4 results. After all, we don't have all day to look through wands!
+There's one more stage we can add to our pipeline to make sure it's fully optimized. Since we only need the maker and damage.magic fields, add a $project stage that only passes those fields along to the rest of operators.
+Remember, where you place this is important!
+> db.wands.aggregate([
+  {"$match": {"level_required": {"$lte": 5}}},
+  {"$project": {"maker": true, "damage.magic": true, "_id": false}},
+  {"$group": {"_id": "$maker", "max_damage": {"$max": "$damage.magic"}}},
+  {"$sort": {"max_damage": -1}},
+  {"$limit": 4}
+])
+
+
