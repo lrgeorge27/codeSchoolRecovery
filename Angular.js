@@ -56,7 +56,7 @@ In the index.html file, add the ng - app directive to the html tag. <
     In index.html, create a simple Expression to display a friendly "Hello, Angular!"
 message. <
     h1 > { { "Hello, Angular!" } }
-<< < << << << < << < << << << << / h1 >
+<< < << << << < << < << << << << << < << < << < / h1 >
 
 1.3 Index HTML Setup
 Controllers:
@@ -103,7 +103,7 @@ In HTML:
     });
 })();
 
-<< < << << << < << < <<!DOCTYPE html >
+<< < << << << < << < << << << << !DOCTYPE html >
     <html ng-app="gemStore">
   <head>
     <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
@@ -160,5 +160,22 @@ Expressions - How values get displayed within the page
 
 1.6 Not For Sale 250 PTS
 We've added two new properties to our product that we can use on the HTML side. The first of these two is canPurchase, which is a boolean indicating if the product can be purchased. The second is soldOut which, as you can imagine, is a boolean indicating if the product is sold out.
-
 Use these two new properties in our HTML page to solve the following objectives.
+
+Use a directive to ensure that we can only see the "Add to Cart" button if the canPurchase property is true.
+<div class="product row" ng-show="store.product.canPurchase">
+
+Our first gem is so popular that we've run out of stock already! Well, Flatlander gems are pretty rare, so it shouldn't be a big surprise. Luckily there is a soldOut property to our gem. When a gem is soldOut, hide the .product element.
+">
+    <div class="product row" ng-show="store.product.canPurchase" ng-hide="store.product.soldOut">
+    
+    
+1.7 Look, More Gems! 250 PTS
+Looks like the Flatlanders have discovered more gems for us to sell in the gemStore. That's a relief! Follow the objectives below to add these new gems to the store.
+In the app.js file we changed things up a little with a new gems array. Assign gems to a products property inside StoreController.
+ app.controller('StoreController', function(){
+    this.products = gems;
+  });
+
+You know how to display all the products, don't you? Use the correct directive to display all the products in product row divs.
+<div class="product row" ng-repeat="product in store.products">
